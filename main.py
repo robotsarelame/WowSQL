@@ -4,18 +4,32 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 import os, re
 html_template =  os.path.join(os.path.dirname(__file__), 'templates/sql_tools.html' )
-SELECT_RE = (r"\s*?(?P<select>SELECT.*?)"
-             r"\s*?(?P<from>FROM.*?)"
-             r"\s*?(?P<join>"
-             r"(?:INNER\s*?|"
-             r"LEFT\s*?(?:OUTER\s*?)?|"
-             r"RIGHT\s*?(?:OUTER\s*?)?|"
-             r"FULL\s*?(?:OUTER\s*?)?|"
-             r"CROSS\s*?)?"
-             r"JOIN.*?)?"
-             r"\s*?(?P<where>WHERE.*?)?"
-             r"\s*?(?P<groupby>GROUP\sBY.*?)?"
-             r"\s*?(?P<orderby>ORDER\sBY.*?)?$")
+SELECT_RE = (r"""
+                \s*?                               # spaces/tabs/new lines before the SELECT statement are valid
+                                                   # --> first group in detail:
+                (?P<select>                        # initialize named group with the 'select' name
+                SELECT                             # matches 'SELECT' (actual RegExp is called with re.IGNORECASE key)
+                .*?)                               # matches any characters (lazy) before next match occurs
+                                                   # --> end of first group
+                \s*?(?P<from>FROM.*?)              # 'from' and following chars
+                \s*?(?P<join>                      # 'join' group
+                (?:INNER\s*?|                      # unnamed group initialization with JOIN modifiers
+                LEFT\s*?(?:OUTER\s*?)?|            # 'LEFT' with optional 'OUTER' modifier
+                RIGHT\s*?(?:OUTER\s*?)?|
+                FULL\s*?(?:OUTER\s*?)?|
+                CROSS\s*?)?                        # the whole unnamed group is optional (the '?' after group)
+                JOIN.*?)?                          # end of 'JOIN' group. The very important here is
+                                                   #   that JOIN and following groups are optional
+                \s*?(?P<where>WHERE.*?)?           # 'WHERE' group
+                \s*?(?P<groupby>GROUP\sBY.*?)?
+                \s*?(?P<orderby>ORDER\sBY.*?)?
+                $                                  # match to the end
+                """)
+
+
+a = re.compile(r"""\d +  # the integral part
+                   \.    # the decimal point
+                   \d *  # some fractional digits""", re.X)
 
 def process_group(raw_sql, line_width, kawaii):
     if raw_sql:
@@ -39,7 +53,7 @@ def process_group(raw_sql, line_width, kawaii):
         return converted_sql
 
 def sql_converter(raw_sql, line_width=60, kawaii=False):
-    select_pattern = re.compile(SELECT_RE, re.IGNORECASE | re.DOTALL)
+    select_pattern = re.compile(SELECT_RE, re.IGNORECASE | re.DOTALL | re.VERBOSE)
     results = select_pattern.match(raw_sql)
     if results:
         converted_sql = []
