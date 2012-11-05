@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <title>SQL Tools</title>
+    <link type="text/css" rel="stylesheet" href="/css/bootstrap.min.css"/>
+</head>
+<body>
+<script src="/js/bootstrap.min.js"></script>
+<div class="container">
+    <div class="row">
+        <div class="span12">
+            <form method="post" class="form-horizontal">
+                <fieldset>
+                    <legend>Enter a SQL query below</legend>
+                    <div class="control-group">
+                        <label class="control-label" for="inputSql">Input SQL</label>
+                        <div class="controls">
+                            <textarea class="input-xxlarge" id="inputSql" rows="7" name="sql_strings" placeholder="Enter SQL strings here...">{{raw_sql|safe}}</textarea>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label" for="outputSql">Output SQL</label>
+                        <div class="controls">
+                            <textarea class="input-xxlarge" id="outputSql" rows="7" name="pretty_sql">{{pretty_sql|safe}}</textarea>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="controls">
+                            <button type="submit" class="btn" name="make_pretty">Prettify it!</button>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>
