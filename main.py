@@ -11,18 +11,18 @@ SELECT_RE = (r"""
                 SELECT                             # matches 'SELECT' (actual RegExp is called with re.IGNORECASE key)
                 .*?)                               # matches any characters (lazy) before next match occurs
                                                    # --> end of first group
-                \s*?(?P<from>FROM.*?)              # 'from' and following chars
+                \s*?(?P<from>FROM\s.*?)            # 'from' and following chars
                 \s*?(?P<join>                      # 'join' group
                 (?:INNER\s*?|                      # unnamed group initialization with JOIN modifiers
                 LEFT\s*?(?:OUTER\s*?)?|            # 'LEFT' with optional 'OUTER' modifier
                 RIGHT\s*?(?:OUTER\s*?)?|
                 FULL\s*?(?:OUTER\s*?)?|
                 CROSS\s*?)?                        # the whole unnamed group is optional (the '?' after group)
-                JOIN.*?)?                          # end of 'JOIN' group. The very important here is
+                JOIN\s.*?)?                        # end of 'JOIN' group. The very important here is
                                                    #   that JOIN and following groups are optional
-                \s*?(?P<where>WHERE.*?)?           # 'WHERE' group
-                \s*?(?P<groupby>GROUP\sBY.*?)?
-                \s*?(?P<orderby>ORDER\sBY.*?)?
+                \s*?(?P<where>WHERE\s.*?)?         # 'WHERE' group
+                \s*?(?P<groupby>GROUP\s*?BY\s.*?)?
+                \s*?(?P<orderby>ORDER\s*?BY\s.*?)?
                 $                                  # match to the end
                 """)
 
@@ -70,9 +70,11 @@ class MainHandler(webapp.RequestHandler):
 
     def post(self):
         raw_sql = self.request.get("sql_strings")
-        pretty_sql = sql_converter(raw_sql).upper()
-        self.render(pretty_sql=pretty_sql, raw_sql=raw_sql)
-
+        pretty_sql = sql_converter(raw_sql)
+        if pretty_sql:
+            self.render(pretty_sql=pretty_sql.upper(), raw_sql=raw_sql)
+        else:
+            self.render(pretty_sql='DUMB!', raw_sql=raw_sql)
 
 #print sql_converter('select * from nds.nds_link where link_id = 12345 and seq_num = 1 and tile_num = 10 and nndb_id is not null order by link_id')
 
