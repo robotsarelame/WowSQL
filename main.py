@@ -6,7 +6,13 @@ import os, re
 html_template =  os.path.join(os.path.dirname(__file__), 'templates/sql_tools.html' )
 SELECT_RE = (r"\s*?(?P<select>SELECT.*?)"
              r"\s*?(?P<from>FROM.*?)"
-             r"\s*?(?P<join>JOIN.*?)?"
+             r"\s*?(?P<join>"
+             r"(?:INNER\s*?|"
+             r"LEFT\s*?(?:OUTER\s*?)?|"
+             r"RIGHT\s*?(?:OUTER\s*?)?|"
+             r"FULL\s*?(?:OUTER\s*?)?|"
+             r"CROSS\s*?)?"
+             r"JOIN.*?)?"
              r"\s*?(?P<where>WHERE.*?)?"
              r"\s*?(?P<groupby>GROUP\sBY.*?)?"
              r"\s*?(?P<orderby>ORDER\sBY.*?)?$")
