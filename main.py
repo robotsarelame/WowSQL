@@ -3,7 +3,11 @@ __author__ = 'miracledelivery'
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 import os, re
-html_template =  os.path.join(os.path.dirname(__file__), 'templates/sql_tools.html' )
+
+# ----------------------------------------------------------------------------------------------------> global variables
+HTML_TEMPLATE =  os.path.join(os.path.dirname(__file__), 'templates/sql_tools.html' )
+
+# regular expression for matching basic SELECT queries
 SELECT_RE = (r"""
                 \s*?                               # spaces/tabs/new lines before the SELECT statement are valid
                                                    # --> first group in detail:
@@ -26,11 +30,10 @@ SELECT_RE = (r"""
                 $                                  # match to the end
                 """)
 
+# precompiled pattern, it's better to have one precompiled for better perfomance
+SELECT_PATTERN = re.compile(SELECT_RE, re.IGNORECASE | re.DOTALL | re.VERBOSE)
 
-a = re.compile(r"""\d +  # the integral part
-                   \.    # the decimal point
-                   \d *  # some fractional digits""", re.X)
-
+# ----------------------------------------------------------------------------------------------------> global functions
 def process_group(raw_sql, line_width, kawaii):
     if raw_sql:
         words = raw_sql.split()
@@ -53,17 +56,17 @@ def process_group(raw_sql, line_width, kawaii):
         return converted_sql
 
 def sql_converter(raw_sql, line_width=60, kawaii=False):
-    select_pattern = re.compile(SELECT_RE, re.IGNORECASE | re.DOTALL | re.VERBOSE)
-    results = select_pattern.match(raw_sql)
+    results = SELECT_PATTERN.match(raw_sql)
     if results:
         converted_sql = []
-        for result in filter(lambda a: a!=None, results.groups()):
+        for result in filter(lambda a: a is not None, results.groups()):
             converted_sql.append(process_group(result, line_width, kawaii))
         return '+ '.join(converted_sql)
 
+# ------------------------------------------------------------------------------------------------------> global classes
 class MainHandler(webapp.RequestHandler):
     def render(self, **values):
-        self.response.out.write(template.render(html_template, values))
+        self.response.out.write(template.render(HTML_TEMPLATE, values))
 
     def get(self):
         self.render()
